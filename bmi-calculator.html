@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI & Health Metrics Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@400;500&family=Instrument+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b09;--s1:#0f1410;--s2:#151c16;--s3:#1b241c;
+  --b1:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.12);
+  --t1:#dce8dd;--t2:#7d9480;--t3:#3e5240;
+  --accent:#36d478;--ad:rgba(54,212,120,0.13);--ab:rgba(54,212,120,0.22);
+  --yellow:#e8b84b;--yd:rgba(232,184,75,0.13);
+  --orange:#e07a35;--od:rgba(224,122,53,0.13);
+  --red:#d94f4f;--rd:rgba(217,79,79,0.13);
+  --red2:#b53535;--rd2:rgba(181,53,53,0.13);
+  --blue:#4a9edd;--bd:rgba(74,158,221,0.13);
+  --purple:#9b72d4;
+  --r:12px;--rl:16px;--rx:22px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+.bg-blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.055}
+.b1{width:700px;height:500px;background:var(--accent);top:-150px;right:-200px}
+.b2{width:500px;height:400px;background:#4a9edd;bottom:-100px;left:-150px}
+.b3{width:300px;height:300px;background:var(--purple);top:45%;left:40%;transform:translate(-50%,-50%)}
+nav{position:sticky;top:0;z-index:200;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(8,11,9,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.nav-right{font-size:11px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase}
+.hero{position:relative;z-index:1;text-align:center;padding:4rem 1rem 2rem}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--ad);border:1px solid var(--ab);padding:5px 16px;border-radius:99px;margin-bottom:1.2rem;animation:up .7s ease both}
+.chip::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+h1{font-family:'Syne',sans-serif;font-size:clamp(2.1rem,5.5vw,3.8rem);font-weight:800;line-height:1.04;letter-spacing:-.03em;margin-bottom:.8rem;animation:up .7s .08s ease both}
+h1 em{font-style:normal;background:linear-gradient(125deg,var(--accent),#7beab8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:15px;color:var(--t2);max-width:420px;margin:0 auto 2.5rem;line-height:1.7;animation:up .7s .16s ease both}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.page{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:0 1rem 5rem}
+.slbl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rx);overflow:hidden;margin-bottom:14px}
+.card:nth-child(1){animation:up .5s ease both}
+.card:nth-child(2){animation:up .5s .05s ease both}
+.card:nth-child(3){animation:up .5s .10s ease both}
+.card:nth-child(4){animation:up .5s .15s ease both}
+.card:nth-child(5){animation:up .5s .20s ease both}
+.card:nth-child(6){animation:up .5s .25s ease both}
+.chd{padding:1.2rem 1.75rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.cht{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t2)}
+.cbody{padding:1.75rem}
+.utog{display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.utog button{background:none;border:none;cursor:pointer;padding:6px 18px;font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:500;color:var(--t2);transition:all .2s}
+.utog button.on{background:var(--accent);color:#080b09}
+.igrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.4rem}
+@media(max-width:600px){.igrid{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.igrid{grid-template-columns:1fr}}
+.field label{display:block;font-size:10px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.iw{display:flex;align-items:stretch;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.iw:focus-within{border-color:var(--accent)}
+.iw input,.iw select{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--t1);font-family:'Instrument Mono',monospace;font-size:16px;padding:10px 12px}
+.iw select{font-family:'Instrument Sans',sans-serif;font-size:13px;cursor:pointer}
+.iw select option{background:#151c16}
+.iu{display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:500;color:var(--t3);border-left:1px solid var(--b1);white-space:nowrap}
+.iwp{display:flex;gap:7px}.iwp .iw{flex:1}
+.agrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media(max-width:580px){.agrid{grid-template-columns:repeat(3,1fr)}}
+.abtn{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px 6px;cursor:pointer;text-align:center;transition:all .2s;color:var(--t2)}
+.abtn:hover{border-color:var(--b2)}
+.abtn.on{background:var(--ad);border-color:var(--ab);color:var(--accent)}
+.ai{font-size:18px;margin-bottom:3px}
+.al{font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;display:block}
+.am{font-family:'Instrument Mono',monospace;font-size:10px;opacity:.55}
+.div{height:1px;background:var(--b1);margin:0 0 1.5rem}
+/* BIG BMI */
+.bmi-hero{display:flex;align-items:stretch;gap:16px;margin-bottom:1.5rem}
+@media(max-width:500px){.bmi-hero{flex-direction:column}}
+.bmi-box{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rl);padding:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:150px;gap:4px}
+.bmi-num{font-family:'Syne',sans-serif;font-size:60px;font-weight:800;line-height:1;letter-spacing:-.04em;color:var(--t3);transition:color .4s}
+.bmi-sub{font-size:10px;color:var(--t3);letter-spacing:.06em;transition:color .4s}
+.bmi-info{flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:10px}
+.bmi-badge{display:inline-block;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:5px 13px;border-radius:6px;background:var(--s2);color:var(--t3);transition:all .3s;width:fit-content}
+.bmi-desc{font-size:13px;color:var(--t2);line-height:1.6;max-width:360px}
+.pstats{display:flex;gap:8px;flex-wrap:wrap}
+.ps{background:var(--s3);border-radius:8px;padding:8px 12px}
+.ps-v{font-family:'Instrument Mono',monospace;font-size:14px;font-weight:500;color:var(--t1)}
+.ps-l{font-size:9px;color:var(--t3);letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+/* GAUGE */
+.ghd{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.gtit{font-size:10px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.gcur{font-family:'Instrument Mono',monospace;font-size:12px;color:var(--t2)}
+.gtrack{height:8px;border-radius:99px;position:relative;background:linear-gradient(to right,#36d478 0 21%,#9ed44a 21% 30%,#e8b84b 30% 42%,#e07a35 42% 57%,#d94f4f 57% 72%,#b53535 72%)}
+.gthumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:var(--t1);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--t1);transition:left .55s cubic-bezier(.34,1.56,.64,1);left:2%}
+.gzones{display:flex;margin-top:5px;font-size:9px;color:var(--t3)}
+/* RINGS */
+.rings{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:.75rem 0 0}
+.rw{text-align:center}
+.rl{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:6px}
+.rv{font-family:'Instrument Mono',monospace;font-size:11px;color:var(--t2);margin-top:2px}
+svg.ring{transform:rotate(-90deg)}
+.rbg{fill:none;stroke:var(--s3);stroke-width:5}
+.rfg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1),stroke .4s}
+/* METRICS */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+.mt{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rl);padding:13px 15px;position:relative;overflow:hidden;transition:border-color .2s}
+.mt::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.mt.ac::before{background:var(--accent)}.mt.yw::before{background:var(--yellow)}.mt.or::before{background:var(--orange)}.mt.re::before{background:var(--red)}.mt.bl::before{background:var(--blue)}.mt.pu::before{background:var(--purple)}
+.mt:hover{border-color:var(--b2)}
+.mt-l{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.mt-v{font-family:'Instrument Mono',monospace;font-size:18px;color:var(--t1);line-height:1.2}
+.mt-s{font-size:10px;color:var(--t3);margin-top:3px;line-height:1.4}
+/* CALORIE */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:1.5rem}
+@media(max-width:580px){.cgrid{grid-template-columns:repeat(2,1fr)}}
+.ct{border-radius:var(--rl);padding:13px;text-align:center;border:1px solid}
+.ct .cl{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.ct .cv{font-family:'Instrument Mono',monospace;font-size:18px;font-weight:500}
+.ct .cs{font-size:9px;margin-top:3px;opacity:.65}
+.cl2{background:var(--rd2);border-color:rgba(181,53,53,.25);color:#d97070}
+.cl1{background:var(--od);border-color:rgba(224,122,53,.25);color:var(--orange)}
+.cm{background:var(--ad);border-color:var(--ab);color:var(--accent)}
+.cg{background:var(--bd);border-color:rgba(74,158,221,.25);color:var(--blue)}
+/* MACROS */
+.macgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:1.5rem}
+@media(max-width:480px){.macgrid{grid-template-columns:1fr}}
+.mact{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rl);padding:13px 15px}
+.machd{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.macn{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase}
+.macg{font-family:'Instrument Mono',monospace;font-size:12px;color:var(--t2)}
+.macbt{height:5px;background:var(--s3);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.macbf{height:100%;border-radius:99px;transition:width .5s ease}
+.macp{font-size:10px;color:var(--t3)}
+/* TIMELINE */
+.tl{display:flex;flex-direction:column}
+.tlr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1)}
+.tlr:last-child{border-bottom:none}
+.tlw{font-family:'Instrument Mono',monospace;font-size:11px;color:var(--t3);min-width:65px}
+.tltr{flex:1;height:5px;background:var(--s3);border-radius:99px;overflow:hidden}
+.tlb{height:100%;border-radius:99px;background:var(--accent);transition:width .5s}
+.tlv{font-family:'Instrument Mono',monospace;font-size:11px;color:var(--t2);min-width:65px;text-align:right}
+/* TABLE */
+.rtable{border:1px solid var(--b1);border-radius:var(--rl);overflow:hidden;margin-bottom:1.5rem}
+.rth,.rtr{display:grid;grid-template-columns:1.8fr .9fr 1fr .8fr;padding:10px 15px;font-size:12px;align-items:center}
+.rth{background:var(--s2);color:var(--t3);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--b1)}
+.rtr{color:var(--t2);border-bottom:1px solid var(--b1)}
+.rtr:last-child{border-bottom:none}
+.rtr.act{background:rgba(255,255,255,.025)}
+.rdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.rcat{display:flex;align-items:center}
+.ytag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-left:6px}
+/* HEALTH RISKS */
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:520px){.hgrid{grid-column:1fr}}
+.hitem{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:13px 14px;display:flex;gap:10px;align-items:flex-start}
+.hicon{font-size:20px;line-height:1;flex-shrink:0}
+.htitle{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.hbody{font-size:11px;color:var(--t2);line-height:1.55}
+.hlvl{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:99px;margin-top:5px}
+.llow{background:var(--ad);color:var(--accent)}.lmod{background:var(--yd);color:var(--yellow)}.lhi{background:var(--od);color:var(--orange)}.lvhi{background:var(--rd);color:var(--red)}
+/* INFO */
+.ibox{background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:13px 15px;margin-bottom:1.5rem}
+.ibt{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:4px}
+.ibb{font-size:12px;color:var(--t2);line-height:1.6}
+/* WAIST TABLE */
+.wtable{border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem}
+.wth,.wtr{display:grid;grid-template-columns:1fr 1fr 1fr;padding:9px 14px;font-size:12px}
+.wth{background:var(--s2);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--b1)}
+.wtr{color:var(--t2);border-bottom:1px solid var(--b1)}.wtr:last-child{border-bottom:none}
+/* PLACEHOLDER */
+.ph{text-align:center;padding:2rem;color:var(--t3);font-size:13px;grid-column:1/-1}
+.phi{font-size:28px;margin-bottom:8px;opacity:.35}
+footer{position:relative;z-index:1;text-align:center;padding:2rem 1rem 3rem;color:var(--t3);font-size:11px;line-height:1.8;border-top:1px solid var(--b1)}
+</style>
+</head>
+<body>
+<div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<nav>
+  <div class="logo">bmi<span>.</span>health</div>
+  <div class="nav-right">Free &middot; No Signup &middot; Instant</div>
+</nav>
+<div class="hero">
+  <div class="chip">Comprehensive Health Calculator</div>
+  <h1>Understand your<br><em>body, deeply</em></h1>
+  <p class="hero-sub">BMI, calorie targets, macros, body composition, health risks, waist ratios &amp; 20+ metrics &mdash; calculated instantly.</p>
+</div>
+<div class="page">
+
+<!-- INPUT CARD -->
+<div class="card">
+  <div class="chd">
+    <div class="cht">Your Details</div>
+    <div class="utog"><button class="on" onclick="setUnit('metric')">Metric</button><button onclick="setUnit('imperial')">Imperial</button></div>
+  </div>
+  <div class="cbody">
+    <div class="igrid">
+      <div class="field" id="f-hm"><label>Height</label><div class="iw"><input type="number" id="h-cm" placeholder="170" min="50" max="300" oninput="calc()"><span class="iu">cm</span></div></div>
+      <div class="field" id="f-hi" style="display:none"><label>Height</label><div class="iwp"><div class="iw"><input type="number" id="h-ft" placeholder="5" oninput="calc()"><span class="iu">ft</span></div><div class="iw"><input type="number" id="h-in" placeholder="7" oninput="calc()"><span class="iu">in</span></div></div></div>
+      <div class="field"><label>Weight</label><div class="iw"><input type="number" id="w1" placeholder="70" oninput="calc()"><span class="iu" id="w-unit">kg</span></div></div>
+      <div class="field"><label>Age</label><div class="iw"><input type="number" id="age" placeholder="30" oninput="calc()"><span class="iu">yrs</span></div></div>
+      <div class="field"><label>Biological Sex</label><div class="iw"><select id="sex" onchange="calc()"><option value="">Select&hellip;</option><option value="male">Male</option><option value="female">Female</option></select></div></div>
+      <div class="field"><label>Waist <span style="opacity:.4">(optional)</span></label><div class="iw"><input type="number" id="waist" placeholder="85" oninput="calc()"><span class="iu" id="waist-unit">cm</span></div></div>
+      <div class="field"><label>Hip <span style="opacity:.4">(optional)</span></label><div class="iw"><input type="number" id="hip" placeholder="95" oninput="calc()"><span class="iu" id="hip-unit">cm</span></div></div>
+    </div>
+    <div class="slbl">Activity Level</div>
+    <div class="agrid">
+      <button class="abtn" data-mul="1.2" onclick="setAct(this,1.2)"><div class="ai">&#x1F6CB;</div><span class="al">Sedentary</span><span class="am">&times;1.2</span></button>
+      <button class="abtn on" data-mul="1.375" onclick="setAct(this,1.375)"><div class="ai">&#x1F6B6;</div><span class="al">Light</span><span class="am">&times;1.375</span></button>
+      <button class="abtn" data-mul="1.55" onclick="setAct(this,1.55)"><div class="ai">&#x1F3C3;</div><span class="al">Moderate</span><span class="am">&times;1.55</span></button>
+      <button class="abtn" data-mul="1.725" onclick="setAct(this,1.725)"><div class="ai">&#x1F4AA;</div><span class="al">Active</span><span class="am">&times;1.725</span></button>
+      <button class="abtn" data-mul="1.9" onclick="setAct(this,1.9)"><div class="ai">&#x1F3CB;</div><span class="al">Very Active</span><span class="am">&times;1.9</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT CARD -->
+<div class="card">
+  <div class="chd"><div class="cht">BMI Result</div><div id="bmi-badge" class="bmi-badge">Enter details above</div></div>
+  <div class="cbody">
+    <div class="bmi-hero">
+      <div class="bmi-box">
+        <div class="bmi-num" id="bmi-num">&mdash;</div>
+        <div class="bmi-sub" id="bmi-sub">kg/m&sup2;</div>
+      </div>
+      <div class="bmi-info">
+        <p class="bmi-desc" id="bmi-desc">Fill in your height and weight to see your BMI, health category and personalised metrics.</p>
+        <div class="pstats">
+          <div class="ps"><div class="ps-v" id="ps-prime">&mdash;</div><div class="ps-l">Optimality</div></div>
+          <div class="ps"><div class="ps-v" id="ps-range">&mdash;</div><div class="ps-l">Healthy Range</div></div>
+          <div class="ps"><div class="ps-v" id="ps-wtl">&mdash;</div><div class="ps-l">To Target</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ghd"><span class="gtit">BMI Scale (15 &rarr; 45+)</span><span class="gcur" id="gauge-lbl">&mdash;</span></div>
+    <div class="gtrack" style="margin-bottom:6px"><div class="gthumb" id="g-thumb"></div></div>
+    <div class="gzones"><span style="width:21%">Underweight</span><span style="width:9%">Normal</span><span style="width:12%">Over</span><span style="width:15%">Ob I</span><span style="width:15%">Ob II</span><span style="width:28%">Ob III+</span></div>
+    <div class="rings">
+      <div class="rw"><svg class="ring" width="64" height="64" viewBox="0 0 64 64"><circle class="rbg" cx="32" cy="32" r="26"/><circle class="rfg" id="r-bmi" cx="32" cy="32" r="26" stroke="#36d478" stroke-dasharray="163.4" stroke-dashoffset="163.4"/></svg><div class="rl">BMI Score</div><div class="rv" id="rv-bmi">&mdash;</div></div>
+      <div class="rw"><svg class="ring" width="64" height="64" viewBox="0 0 64 64"><circle class="rbg" cx="32" cy="32" r="26"/><circle class="rfg" id="r-health" cx="32" cy="32" r="26" stroke="#9b72d4" stroke-dasharray="163.4" stroke-dashoffset="163.4"/></svg><div class="rl">Health Score</div><div class="rv" id="rv-health">&mdash;</div></div>
+      <div class="rw"><svg class="ring" width="64" height="64" viewBox="0 0 64 64"><circle class="rbg" cx="32" cy="32" r="26"/><circle class="rfg" id="r-bmr" cx="32" cy="32" r="26" stroke="#4a9edd" stroke-dasharray="163.4" stroke-dashoffset="163.4"/></svg><div class="rl">Metabolism</div><div class="rv" id="rv-bmr">&mdash;</div></div>
+      <div class="rw"><svg class="ring" width="64" height="64" viewBox="0 0 64 64"><circle class="rbg" cx="32" cy="32" r="26"/><circle class="rfg" id="r-bsa" cx="32" cy="32" r="26" stroke="#e8b84b" stroke-dasharray="163.4" stroke-dashoffset="163.4"/></svg><div class="rl">BSA Score</div><div class="rv" id="rv-bsa">&mdash;</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BODY METRICS CARD -->
+<div class="card">
+  <div class="chd"><div class="cht">Body Metrics</div><div style="font-size:11px;color:var(--t3)">20+ calculated values</div></div>
+  <div class="cbody">
+    <div class="mgrid">
+      <div class="mt ac"><div class="mt-l">Ideal Weight</div><div class="mt-v" id="m-ideal">&mdash;</div><div class="mt-s">BMI 18.5&ndash;24.9</div></div>
+      <div class="mt bl"><div class="mt-l">BMR</div><div class="mt-v" id="m-bmr">&mdash;</div><div class="mt-s">kcal/day at rest</div></div>
+      <div class="mt yw"><div class="mt-l">TDEE</div><div class="mt-v" id="m-tdee">&mdash;</div><div class="mt-s" id="m-tdee-s">total daily energy</div></div>
+      <div class="mt pu"><div class="mt-l">Body Surface Area</div><div class="mt-v" id="m-bsa">&mdash;</div><div class="mt-s">Mosteller (m&sup2;)</div></div>
+      <div class="mt or"><div class="mt-l">Ponderal Index</div><div class="mt-v" id="m-pi">&mdash;</div><div class="mt-s">normal 11&ndash;15 kg/m&sup3;</div></div>
+      <div class="mt re"><div class="mt-l">Lean Body Mass</div><div class="mt-v" id="m-lbm">&mdash;</div><div class="mt-s">Boer formula</div></div>
+      <div class="mt bl"><div class="mt-l">Fat Mass Est.</div><div class="mt-v" id="m-fat">&mdash;</div><div class="mt-s">BMI-based approx.</div></div>
+      <div class="mt ac"><div class="mt-l">Waist-Hip Ratio</div><div class="mt-v" id="m-whr">&mdash;</div><div class="mt-s" id="m-whr-s">needs waist &amp; hip</div></div>
+      <div class="mt pu"><div class="mt-l">Waist-Height Ratio</div><div class="mt-v" id="m-whratio">&mdash;</div><div class="mt-s">healthy: &lt;0.5</div></div>
+      <div class="mt yw"><div class="mt-l">Relative Fat Mass</div><div class="mt-v" id="m-rfm">&mdash;</div><div class="mt-s">needs waist meas.</div></div>
+      <div class="mt or"><div class="mt-l">Hamwi Ideal Wt</div><div class="mt-v" id="m-hamwi">&mdash;</div><div class="mt-s">Hamwi formula</div></div>
+      <div class="mt re"><div class="mt-l">Devine Ideal Wt</div><div class="mt-v" id="m-devine">&mdash;</div><div class="mt-s">Devine formula</div></div>
+      <div class="mt bl"><div class="mt-l">Robinson Ideal Wt</div><div class="mt-v" id="m-robinson">&mdash;</div><div class="mt-s">Robinson formula</div></div>
+      <div class="mt ac"><div class="mt-l">Miller Ideal Wt</div><div class="mt-v" id="m-miller">&mdash;</div><div class="mt-s">Miller formula</div></div>
+      <div class="mt pu"><div class="mt-l">Creatinine Clear.</div><div class="mt-v" id="m-crcl">&mdash;</div><div class="mt-s">Cockcroft-Gault est.</div></div>
+      <div class="mt yw"><div class="mt-l">Body Adiposity Idx</div><div class="mt-v" id="m-bai">&mdash;</div><div class="mt-s">needs hip meas.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALORIE & MACROS CARD -->
+<div class="card">
+  <div class="chd"><div class="cht">Calorie Goals &amp; Macros</div><div style="font-size:11px;color:var(--t3)" id="cal-note">Based on TDEE</div></div>
+  <div class="cbody">
+    <div class="cgrid">
+      <div class="ct cl2"><div class="cl">Aggressive Loss</div><div class="cv" id="cal-l2">&mdash;</div><div class="cs">&minus;1 kg/week</div></div>
+      <div class="ct cl1"><div class="cl">Moderate Loss</div><div class="cv" id="cal-l1">&mdash;</div><div class="cs">&minus;0.5 kg/week</div></div>
+      <div class="ct cm"><div class="cl">Maintenance</div><div class="cv" id="cal-m">&mdash;</div><div class="cs">hold current weight</div></div>
+      <div class="ct cg"><div class="cl">Lean Gain</div><div class="cv" id="cal-g">&mdash;</div><div class="cs">+0.25 kg/week</div></div>
+    </div>
+    <div class="div"></div>
+    <div class="slbl">Macronutrient Targets (Maintenance &mdash; Balanced Split)</div>
+    <div class="macgrid">
+      <div class="mact"><div class="machd"><span class="macn" style="color:#36d478">Protein</span><span class="macg" id="mp-g">&mdash;</span></div><div class="macbt"><div class="macbf" id="mp-b" style="background:#36d478;width:0%"></div></div><div class="macp">30% of calories &middot; 4 kcal/g</div></div>
+      <div class="mact"><div class="machd"><span class="macn" style="color:#e8b84b">Carbohydrates</span><span class="macg" id="mc-g">&mdash;</span></div><div class="macbt"><div class="macbf" id="mc-b" style="background:#e8b84b;width:0%"></div></div><div class="macp">40% of calories &middot; 4 kcal/g</div></div>
+      <div class="mact"><div class="machd"><span class="macn" style="color:#9b72d4">Fat</span><span class="macg" id="mf-g">&mdash;</span></div><div class="macbt"><div class="macbf" id="mf-b" style="background:#9b72d4;width:0%"></div></div><div class="macp">30% of calories &middot; 9 kcal/g</div></div>
+    </div>
+    <div class="div"></div>
+    <div class="slbl">Weight Loss Timeline (at &minus;500 kcal/day deficit)</div>
+    <div class="tl" id="timeline"><div class="ph"><div class="phi">&#x1F4C5;</div>Enter age &amp; sex to see your timeline</div></div>
+  </div>
+</div>
+
+<!-- BMI TABLE CARD -->
+<div class="card">
+  <div class="chd"><div class="cht">WHO BMI Classification</div></div>
+  <div class="cbody">
+    <div class="rtable">
+      <div class="rth"><span>Category</span><span>BMI</span><span>Health Risk</span><span>~Prevalence</span></div>
+      <div class="rtr" id="row-under"><span class="rcat"><span class="rdot" style="background:#36d478"></span>Underweight<span class="ytag" id="yt-under" style="display:none;background:var(--ad);color:var(--accent)">You</span></span><span>&lt;18.5</span><span>Increased</span><span>~4%</span></div>
+      <div class="rtr" id="row-normal"><span class="rcat"><span class="rdot" style="background:#9ed44a"></span>Normal<span class="ytag" id="yt-normal" style="display:none;background:var(--ad);color:var(--accent)">You</span></span><span>18.5&ndash;24.9</span><span>Low</span><span>~32%</span></div>
+      <div class="rtr" id="row-over"><span class="rcat"><span class="rdot" style="background:#e8b84b"></span>Overweight<span class="ytag" id="yt-over" style="display:none;background:var(--yd);color:var(--yellow)">You</span></span><span>25&ndash;29.9</span><span>Moderate</span><span>~34%</span></div>
+      <div class="rtr" id="row-ob1"><span class="rcat"><span class="rdot" style="background:#e07a35"></span>Obese I<span class="ytag" id="yt-ob1" style="display:none;background:var(--od);color:var(--orange)">You</span></span><span>30&ndash;34.9</span><span>High</span><span>~14%</span></div>
+      <div class="rtr" id="row-ob2"><span class="rcat"><span class="rdot" style="background:#d94f4f"></span>Obese II<span class="ytag" id="yt-ob2" style="display:none;background:var(--rd);color:var(--red)">You</span></span><span>35&ndash;39.9</span><span>Very High</span><span>~7%</span></div>
+      <div class="rtr" id="row-ob3"><span class="rcat"><span class="rdot" style="background:#b53535"></span>Obese III<span class="ytag" id="yt-ob3" style="display:none;background:var(--rd2);color:var(--red2)">You</span></span><span>&ge;40</span><span>Extremely High</span><span>~5%</span></div>
+    </div>
+    <div class="slbl">Waist Circumference Risk Thresholds (WHO)</div>
+    <div class="wtable">
+      <div class="wth"><span>Sex</span><span>Increased Risk</span><span>High Risk</span></div>
+      <div class="wtr"><span style="color:var(--t1)">Male</span><span>&ge;94 cm (37 in)</span><span>&ge;102 cm (40 in)</span></div>
+      <div class="wtr"><span style="color:var(--t1)">Female</span><span>&ge;80 cm (31.5 in)</span><span>&ge;88 cm (34.5 in)</span></div>
+    </div>
+    <div class="ibox"><div class="ibt">About BMI Limitations</div><div class="ibb">BMI is a screening tool, not a diagnostic measure. It does not account for muscle mass, bone density, fat distribution, age, ethnicity, or sex differences in body composition. Athletes may appear "overweight" while being entirely healthy. Use BMI alongside waist circumference, waist-height ratio, and clinical assessment for a fuller picture.</div></div>
+  </div>
+</div>
+
+<!-- HEALTH RISKS CARD -->
+<div class="card">
+  <div class="chd"><div class="cht">Associated Health Risks</div><div style="font-size:11px;color:var(--t3)">Based on your BMI category</div></div>
+  <div class="cbody"><div class="hgrid" id="risks-grid"><div class="ph"><div class="phi">&#x1F3E5;</div>Enter your details to see personalised risk indicators</div></div></div>
+</div>
+
+</div><!-- /page -->
+<footer>
+  <strong style="color:var(--t2)">Disclaimer:</strong> For informational purposes only &mdash; not medical advice.<br>
+  Formulas: BMR (Mifflin&ndash;St Jeor) &middot; LBM (Boer) &middot; RFM (Woolcott &amp; Bergman) &middot; BSA (Mosteller) &middot; Ideal Wt (Hamwi, Devine, Robinson, Miller)<br>
+  Always consult a qualified healthcare professional for personal medical guidance.<br><br>
+  bmi.health &middot; 2025
+</footer>
+<script>
+let unit='metric',actMul=1.375;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=1)=>isNaN(v)||!isFinite(v)?'&mdash;':v.toFixed(d);
+const fmtS=(v,d=1)=>isNaN(v)||!isFinite(v)?'—':v.toFixed(d);
+
+function setUnit(u){
+  unit=u;
+  document.querySelectorAll('.utog button').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase()===u));
+  const m=u==='metric';
+  $('f-hm').style.display=m?'':'none';$('f-hi').style.display=m?'none':'';
+  $('w-unit').textContent=m?'kg':'lbs';$('w1').placeholder=m?'70':'154';
+  $('waist-unit').textContent=m?'cm':'in';$('hip-unit').textContent=m?'cm':'in';
+  calc();
+}
+function setAct(btn,mul){
+  actMul=mul;
+  document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');calc();
+}
+function getH(){
+  if(unit==='metric'){const v=parseFloat($('h-cm').value);return isNaN(v)?null:v;}
+  const ft=parseFloat($('h-ft').value)||0,i=parseFloat($('h-in').value)||0;
+  return(!ft&&!i)?null:(ft*12+i)*2.54;
+}
+function getW(){const v=parseFloat($('w1').value);if(isNaN(v))return null;return unit==='metric'?v:v*0.453592;}
+function getWaist(){const v=parseFloat($('waist').value);if(isNaN(v))return null;return unit==='metric'?v:v*2.54;}
+function getHip(){const v=parseFloat($('hip').value);if(isNaN(v))return null;return unit==='metric'?v:v*2.54;}
+
+function setRing(id,pct,color){
+  const circ=163.4,el=$(id);
+  el.style.strokeDashoffset=(circ*(1-Math.min(Math.max(pct/100,0),1))).toFixed(1);
+  if(color)el.style.stroke=color;
+}
+
+const CATS={
+  under:{label:'Underweight',color:'#36d478',bg:'rgba(54,212,120,0.1)',desc:'Being underweight may indicate nutritional deficiencies, malnutrition, or underlying health issues. It can impact bone density, immunity, hormone balance, and energy levels.'},
+  normal:{label:'Normal Weight',color:'#9ed44a',bg:'rgba(158,212,74,0.1)',desc:'Your BMI is in the healthy range — associated with the lowest risk of chronic disease. Maintaining a balanced diet and regular physical activity supports long-term wellbeing.'},
+  over:{label:'Overweight',color:'#e8b84b',bg:'rgba(232,184,75,0.1)',desc:'Overweight status can elevate risk of hypertension, type 2 diabetes, and joint stress. Even a 5–10% weight reduction can deliver meaningful cardiovascular and metabolic benefits.'},
+  ob1:{label:'Obese Class I',color:'#e07a35',bg:'rgba(224,122,53,0.1)',desc:'Obesity class I significantly raises cardiovascular, metabolic, and musculoskeletal risk. A structured plan combining diet, exercise, and medical support is recommended.'},
+  ob2:{label:'Obese Class II',color:'#d94f4f',bg:'rgba(217,79,79,0.1)',desc:'High health risk. Severe complications affecting heart, joints, breathing, and metabolism are common. Medical supervision and structured weight management are strongly advised.'},
+  ob3:{label:'Obese Class III',color:'#b53535',bg:'rgba(181,53,53,0.1)',desc:'Morbid obesity carries extremely high risk of life-threatening conditions. A comprehensive medical programme — potentially including pharmacological or surgical options — is recommended.'},
+};
+
+const RISKS={
+  under:[
+    {icon:'🦴',title:'Bone Density Loss',body:'Low body weight is linked to lower bone mineral density, increasing fracture and osteoporosis risk.',level:'lhi'},
+    {icon:'🛡️',title:'Immune Impairment',body:'Low weight can impair immune response, increasing susceptibility to infections and slowing recovery.',level:'lmod'},
+    {icon:'🧠',title:'Nutritional Deficiency',body:'Often accompanied by deficiencies in iron, B12, vitamin D and calcium, affecting brain and organ function.',level:'lhi'},
+    {icon:'💗',title:'Hormonal Disruption',body:'Underweight can disrupt reproductive hormones causing irregular cycles in females and reduced testosterone in males.',level:'lmod'},
+  ],
+  normal:[
+    {icon:'❤️',title:'Cardiovascular Disease',body:'Normal BMI is associated with the lowest population-level risk of heart disease, hypertension, and stroke.',level:'llow'},
+    {icon:'🩸',title:'Type 2 Diabetes',body:'Healthy BMI significantly reduces insulin resistance and likelihood of developing type 2 diabetes.',level:'llow'},
+    {icon:'🦴',title:'Joint Health',body:'Normal weight places appropriate mechanical load on joints, reducing wear and osteoarthritis risk.',level:'llow'},
+    {icon:'😴',title:'Sleep Quality',body:'Normal weight is linked to lower incidence of sleep apnea and better overall sleep architecture.',level:'llow'},
+  ],
+  over:[
+    {icon:'❤️',title:'Cardiovascular Risk',body:'Elevated LDL cholesterol, blood pressure, and increased coronary artery disease risk are common.',level:'lmod'},
+    {icon:'🩸',title:'Insulin Resistance',body:'Excess weight — especially abdominal fat — promotes insulin resistance and pre-diabetes.',level:'lmod'},
+    {icon:'🦴',title:'Joint Strain',body:'Extra weight increases compressive forces on knees and hips, accelerating cartilage degradation.',level:'lmod'},
+    {icon:'😴',title:'Sleep Apnea',body:'A significant risk factor for obstructive sleep apnea, reducing sleep quality and increasing daytime fatigue.',level:'lmod'},
+  ],
+  ob1:[
+    {icon:'❤️',title:'Cardiovascular Disease',body:'Obesity class I substantially increases risk of heart attack, stroke, heart failure, and atrial fibrillation.',level:'lhi'},
+    {icon:'🩸',title:'Type 2 Diabetes',body:'Obesity is the leading modifiable risk factor for type 2 diabetes, with risk rising with each BMI unit above 25.',level:'lhi'},
+    {icon:'🫁',title:'Respiratory Issues',body:'Increased chest fat restricts breathing, worsening asthma and elevating sleep apnea severity.',level:'lhi'},
+    {icon:'🔬',title:'Cancer Risk',body:'Obesity is linked to higher risk of colorectal, breast, endometrial, and kidney cancers.',level:'lmod'},
+  ],
+  ob2:[
+    {icon:'❤️',title:'Severe Cardiac Risk',body:'Very high risk of major cardiovascular events. Regular monitoring of blood pressure, lipids, and cardiac function is essential.',level:'lvhi'},
+    {icon:'🩸',title:'Metabolic Syndrome',body:'Strong association with metabolic syndrome — a cluster of conditions that multiplies cardiovascular and diabetes risk.',level:'lvhi'},
+    {icon:'🫁',title:'Severe Sleep Apnea',body:'Often severe, with associated daytime hypoxia, cognitive impairment, and pulmonary hypertension.',level:'lhi'},
+    {icon:'🦴',title:'Mobility Limitation',body:'Severe joint loading results in chronic pain, reduced mobility, and frequent need for orthopaedic intervention.',level:'lhi'},
+  ],
+  ob3:[
+    {icon:'❤️',title:'Extreme Cardiac Risk',body:'Morbid obesity carries extreme risk of sudden cardiac death, heart failure, and all major cardiovascular events.',level:'lvhi'},
+    {icon:'🔬',title:'Multi-Organ Impact',body:'Simultaneously affects liver (NAFLD/NASH), kidneys, pancreas, and endocrine function.',level:'lvhi'},
+    {icon:'🏥',title:'Surgical Risk',body:'Even routine procedures carry significantly elevated risks due to anaesthesia, wound healing, and complications.',level:'lvhi'},
+    {icon:'🧠',title:'Mental Health',body:'Severe obesity frequently co-occurs with depression, anxiety, and social isolation, creating a reinforcing cycle.',level:'lhi'},
+  ],
+};
+
+const LBLS={llow:'Low Risk',lmod:'Moderate',lhi:'High Risk',lvhi:'Very High'};
+
+function renderRisks(k){
+  const risks=RISKS[k]||RISKS.normal;
+  $('risks-grid').innerHTML=risks.map(r=>`<div class="hitem"><div class="hicon">${r.icon}</div><div><div class="htitle">${r.title}</div><div class="hbody">${r.body}</div><span class="hlvl ${r.level}">${LBLS[r.level]}</span></div></div>`).join('');
+}
+
+function renderTimeline(tdee){
+  const u=unit==='metric'?'kg':'lbs',f=unit==='metric'?1:2.205;
+  const rows=[{l:'4 weeks',kg:2},{l:'8 weeks',kg:4},{l:'3 months',kg:6.5},{l:'6 months',kg:13},{l:'1 year',kg:26}];
+  $('timeline').innerHTML=rows.map(r=>`<div class="tlr"><span class="tlw">${r.l}</span><div class="tltr"><div class="tlb" style="width:${Math.min(r.kg/26*100,100)}%"></div></div><span class="tlv">&minus;${(r.kg*f).toFixed(1)} ${u}</span></div>`).join('');
+}
+
+function clearAll(){
+  $('bmi-num').innerHTML='&mdash;';$('bmi-num').style.color='var(--t3)';
+  $('bmi-sub').style.color='var(--t3)';
+  $('bmi-badge').textContent='Enter details above';$('bmi-badge').style.background='var(--s2)';$('bmi-badge').style.color='var(--t3)';
+  $('bmi-desc').textContent='Fill in your height and weight to see your BMI and personalised health metrics.';
+  $('g-thumb').style.left='2%';$('gauge-lbl').textContent='—';
+  $('ps-prime').textContent='—';$('ps-range').textContent='—';$('ps-wtl').textContent='—';
+  ['r-bmi','r-health','r-bmr','r-bsa'].forEach(id=>setRing(id,0));
+  ['rv-bmi','rv-health','rv-bmr','rv-bsa'].forEach(id=>$(id).textContent='—');
+  ['m-ideal','m-bmr','m-tdee','m-bsa','m-pi','m-lbm','m-fat','m-whr','m-whratio','m-rfm','m-hamwi','m-devine','m-robinson','m-miller','m-crcl','m-bai'].forEach(id=>$(id).textContent='—');
+  ['cal-l2','cal-l1','cal-m','cal-g'].forEach(id=>$(id).textContent='—');
+  ['mp-g','mc-g','mf-g'].forEach(id=>$(id).textContent='—');
+  ['mp-b','mc-b','mf-b'].forEach(id=>$(id).style.width='0%');
+  $('timeline').innerHTML='<div class="ph"><div class="phi">📅</div>Enter age &amp; sex to see timeline</div>';
+  $('risks-grid').innerHTML='<div class="ph"><div class="phi">🏥</div>Enter your details to see personalised risk indicators</div>';
+  ['under','normal','over','ob1','ob2','ob3'].forEach(r=>{$('row-'+r).classList.remove('act');$('yt-'+r).style.display='none';});
+}
+
+function calc(){
+  const h=getH(),w=getW(),age=parseFloat($('age').value),sex=$('sex').value,waist=getWaist(),hip=getHip();
+  const wU=unit==='metric'?'kg':'lbs',wF=unit==='metric'?1:2.205;
+  if(!h||!w||h<=0||w<=0){clearAll();return;}
+  const hm=h/100,bmi=w/(hm*hm);
+  let catKey=bmi<18.5?'under':bmi<25?'normal':bmi<30?'over':bmi<35?'ob1':bmi<40?'ob2':'ob3';
+  const cat=CATS[catKey];
+  $('bmi-num').textContent=fmtS(bmi);$('bmi-num').style.color=cat.color;$('bmi-sub').style.color=cat.color;
+  $('bmi-badge').textContent=cat.label;$('bmi-badge').style.background=cat.bg;$('bmi-badge').style.color=cat.color;
+  $('bmi-desc').textContent=cat.desc;
+  const gPct=Math.min(Math.max((bmi-15)/30*100,2),98);
+  $('g-thumb').style.left=gPct.toFixed(1)+'%';$('gauge-lbl').textContent='BMI '+fmtS(bmi);
+  ['under','normal','over','ob1','ob2','ob3'].forEach(r=>{$('row-'+r).classList.remove('act');$('yt-'+r).style.display='none';});
+  $('row-'+catKey).classList.add('act');$('yt-'+catKey).style.display='inline-block';
+  const iwMin=18.5*hm*hm,iwMax=24.9*hm*hm;
+  $('m-ideal').textContent=fmtS(iwMin*wF,0)+'–'+fmtS(iwMax*wF,0)+' '+wU;
+  const primePct=Math.max(0,Math.min(100,100-Math.abs(bmi-22)/22*150));
+  $('ps-prime').textContent=Math.round(primePct)+'%';
+  $('ps-range').textContent=fmtS(iwMin*wF,0)+'–'+fmtS(iwMax*wF,0)+' '+wU;
+  if(bmi>24.9){$('ps-wtl').textContent='−'+fmtS((w-iwMax)*wF,1)+' '+wU;}
+  else if(bmi<18.5){$('ps-wtl').textContent='+'+fmtS((iwMin-w)*wF,1)+' '+wU;}
+  else{$('ps-wtl').textContent='✓ In range';}
+  const bsa=Math.sqrt(h*w/3600);
+  $('m-bsa').textContent=fmtS(bsa,2)+' m²';
+  $('m-pi').textContent=fmtS(w/(hm*hm*hm),1)+' kg/m³';
+  if(sex){
+    const lbm=sex==='male'?(0.407*w+0.267*h-19.2):(0.252*w+0.473*h-48.3);
+    const fat=w-lbm,fatPct=fat/w*100;
+    $('m-lbm').textContent=fmtS(lbm*wF,1)+' '+wU;
+    $('m-fat').textContent=fmtS(fat*wF,1)+' '+wU+' ('+fmtS(fatPct,0)+'%)';
+    const inchOver=Math.max(0,h/2.54-60);
+    $('m-hamwi').textContent=fmtS((sex==='male'?48.1+2.7*inchOver:45.4+2.3*inchOver)*wF,1)+' '+wU;
+    $('m-devine').textContent=fmtS((sex==='male'?50+2.3*inchOver:45.5+2.3*inchOver)*wF,1)+' '+wU;
+    $('m-robinson').textContent=fmtS((sex==='male'?52+1.9*inchOver:49+1.7*inchOver)*wF,1)+' '+wU;
+    $('m-miller').textContent=fmtS((sex==='male'?56.2+1.41*inchOver:53.1+1.36*inchOver)*wF,1)+' '+wU;
+  } else {
+    ['m-lbm','m-fat','m-hamwi','m-devine','m-robinson','m-miller'].forEach(id=>$(id).textContent='Need sex');
+  }
+  if(waist){
+    const whr2=waist/h;
+    $('m-whratio').textContent=fmtS(whr2,3)+(whr2<0.5?' ✓':' ↑');
+    if(sex){const rfm=sex==='male'?64-20*(h/waist):76-20*(h/waist);$('m-rfm').textContent=fmtS(rfm,1)+'%';}
+    else $('m-rfm').textContent='Need sex';
+  } else {$('m-whratio').textContent='—';$('m-rfm').textContent='Enter waist';}
+  if(waist&&hip){
+    $('m-whr').textContent=fmtS(waist/hip,2);
+    $('m-whr-s').textContent=sex==='male'?'healthy: <0.9 (male)':'healthy: <0.8 (female)';
+    $('m-bai').textContent=fmtS(hip/Math.pow(hm,1.5)-18,1)+'%';
+  } else {$('m-whr').textContent='—';$('m-whr-s').textContent='enter waist & hip';$('m-bai').textContent='Need hip';}
+  if(age&&sex){
+    const crcl=((140-age)*w)/(72*1.0)*(sex==='female'?0.85:1);
+    $('m-crcl').textContent=fmtS(crcl,0)+' mL/min';
+    const bmr=sex==='male'?(10*w+6.25*h-5*age+5):(10*w+6.25*h-5*age-161);
+    const tdee=bmr*actMul;
+    $('m-bmr').textContent=Math.round(bmr)+' kcal';
+    $('m-tdee').textContent=Math.round(tdee)+' kcal';
+    const labs=['Sedentary','Light','Moderate','Active','Very Active'],muls=[1.2,1.375,1.55,1.725,1.9];
+    const idx=muls.indexOf(actMul);$('m-tdee-s').textContent=idx>=0?labs[idx]+' activity':'';
+    $('cal-note').textContent='TDEE: '+Math.round(tdee)+' kcal';
+    $('cal-l2').textContent=Math.round(tdee-1100)+' kcal';$('cal-l1').textContent=Math.round(tdee-550)+' kcal';
+    $('cal-m').textContent=Math.round(tdee)+' kcal';$('cal-g').textContent=Math.round(tdee+275)+' kcal';
+    $('mp-g').textContent=Math.round(tdee*.30/4)+'g';$('mc-g').textContent=Math.round(tdee*.40/4)+'g';$('mf-g').textContent=Math.round(tdee*.30/9)+'g';
+    ['mp-b','mc-b','mf-b'].forEach(id=>$(id).style.width='100%');
+    renderTimeline(tdee);
+    const hs=catKey==='normal'?92:catKey==='over'?65:catKey==='ob1'?42:catKey==='ob2'?24:catKey==='ob3'?10:48;
+    setRing('r-bmi',primePct,'#36d478');setRing('r-health',hs,'#9b72d4');
+    setRing('r-bmr',Math.min(100,bmr/2800*100),'#4a9edd');setRing('r-bsa',Math.min(100,bsa/2.3*100),'#e8b84b');
+    $('rv-bmi').textContent=Math.round(primePct)+'%';$('rv-health').textContent=Math.round(hs)+'/100';
+    $('rv-bmr').textContent=Math.round(bmr)+' kcal';$('rv-bsa').textContent=fmtS(bsa,2)+' m²';
+  } else {
+    ['m-bmr','m-tdee'].forEach(id=>$(id).textContent='Need age & sex');
+    ['m-crcl'].forEach(id=>$(id).textContent='Need age & sex');
+    ['cal-l2','cal-l1','cal-m','cal-g'].forEach(id=>$(id).textContent='—');
+    $('timeline').innerHTML='<div class="ph"><div class="phi">📅</div>Enter age &amp; sex to see timeline</div>';
+    setRing('r-bmi',primePct,'#36d478');$('rv-bmi').textContent=Math.round(primePct)+'%';
+    setRing('r-bsa',Math.min(100,bsa/2.3*100),'#e8b84b');$('rv-bsa').textContent=fmtS(bsa,2)+' m²';
+    setRing('r-health',0);setRing('r-bmr',0);$('rv-health').textContent='—';$('rv-bmr').textContent='—';
+  }
+  renderRisks(catKey);
+}
+</script>
+</body>
+</html>
