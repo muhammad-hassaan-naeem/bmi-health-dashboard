@@ -4,6 +4,7 @@
 **Role:** Lab Engineer @ SCAT | ML Researcher  
 **LinkedIn:** [muhammad-hassaan-naeem](https://www.linkedin.com/in/muhammad-hassaan-naeem-b51610354/)  
 **Live Demo:** Open `bmi-calculator.html` in any browser — no installation needed
+**Website Link:** https://muhammad-hassaan-naeem.github.io/bmi-health-dashboard/bmi-calculator.html
 
 ---
 
